@@ -1,29 +1,20 @@
-import datetime
-import json
 import pythonwhois
 
-from flask import Flask, request
-
-
-def json_fallback(obj):
-    if isinstance(obj, datetime.datetime):
-        return obj.isoformat()
-    else:
-        return obj
+from flask import Flask, jsonify, request
 
 
 app = Flask(__name__)
 
 
 @app.route('/')
-def hello_world():
+def whois_app():
     domain = request.args.get('domain', None)
     format = request.args.get('format', 'raw')
     if domain:
         data = pythonwhois.net.get_whois_raw(domain)
         if format == 'json':
             parsed = pythonwhois.parse.parse_raw_whois(data, normalized=True)
-            return json.dumps(parsed, default=json_fallback)
+            return jsonify(parsed)
         elif format == 'raw':
             return '<pre>{0}</pre>'.format(data[0])
         else:
@@ -33,4 +24,4 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    whois_app.run(debug=True)
